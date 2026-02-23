@@ -11,6 +11,14 @@ export class CvService {
   constructor(
     @InjectRepository(CvEntity) private cvRepository: Repository<CvEntity>,
   ) {}
+
+  async getCvById(id: number) {
+    const cv = await this.cvRepository.findOne({ where: { id } });
+    if (!cv) {
+      throw new NotFoundException(`le cv d'id ${id} n'existe pas`);
+    }
+    return cv;
+  }
   async getCvs(): Promise<CvEntity[]> {
     return await this.cvRepository.find();
   }
@@ -30,14 +38,35 @@ export class CvService {
   //   return this.cvRepository.update(updateCriteria, cv);
   // }
   async deleteCv(id: number) {
-    const removeCv = await this.cvRepository.findOne({ where: { id } });
-    if (!removeCv) {
-      throw new NotFoundException(`le cv d'id ${id} n'existe pas`);
-    }
+    const removeCv = await this.getCvById(id);
+    // const removeCv = await this.cvRepository.findOne({ where: { id } });
+    // if (!removeCv) {
+    //   throw new NotFoundException(`le cv d'id ${id} n'existe pas`);
+    // }
     return await this.cvRepository.remove(removeCv);
   }
   async deleteCv2(id: number) {
     return await this.cvRepository.delete(id);
     // return await this.cvRepository.delete([1, 2, 4]);
+  }
+
+  //soft delete/remove (suppression logique)
+
+  async softDeleteCv(id: number) {
+    return await this.cvRepository.softDelete(id);
+  }
+
+  async restoreCv(id: number) {
+    return await this.cvRepository.restore(id);
+  }
+
+  async softRemoveCv(id: number) {
+    const removCv = await this.getCvById(id);
+    return await this.cvRepository.softRemove(removCv);
+  }
+
+  async recoverCv(id: number) {
+    const recoverCv = await this.getCvById(id);
+    return await this.cvRepository.recover(recoverCv);
   }
 }

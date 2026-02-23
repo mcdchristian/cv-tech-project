@@ -52,4 +52,26 @@ export class CvController {
   // async deleteCv2(@Param('id', ParseIntPipe) id: number) {
   //   return await this.CvService.deleteCv2(id);
   // }
+
+  //soft delete/remove (suppression logique)
+
+  // @Delete(':id')
+  // async softRemoveCv(@Param('id', ParseIntPipe) id: number) {
+  //   return await this.CvService.softRemoveCv(id);
+  // }
+
+  // @Get('recover/:id')
+  // async recoverCv(@Param('id', ParseIntPipe) id: number) {
+  //   return await this.CvService.recoverCv(id);
+  // }
+
+  @Delete(':id')
+  async softDeleteCv(@Param('id', ParseIntPipe) id: number) {
+    return await this.CvService.softDeleteCv(id);
+  }
+
+  @Get('recover/:id')
+  async restoreCv(@Param('id', ParseIntPipe) id: number) {
+    return await this.CvService.restoreCv(id);
+  }
 }

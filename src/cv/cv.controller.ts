@@ -21,6 +21,7 @@ export class CvController {
   async getAllCvs(): Promise<CvEntity[]> {
     return await this.CvService.getCvs();
   }
+
   @Post()
   async addCv(@Body() cv: AddcvDto): Promise<CvEntity> {
     return await this.CvService.addCv(cv);
@@ -48,6 +49,7 @@ export class CvController {
   async deleteCv(@Param('id', ParseIntPipe) id: number) {
     return await this.CvService.deleteCv(id);
   }
+
   // @Delete(':id')
   // async deleteCv2(@Param('id', ParseIntPipe) id: number) {
   //   return await this.CvService.deleteCv2(id);
@@ -73,5 +75,15 @@ export class CvController {
   @Get('recover/:id')
   async restoreCv(@Param('id', ParseIntPipe) id: number) {
     return await this.CvService.restoreCv(id);
+  }
+  // Query builder
+  @Get('stats')
+  async getCvNumberByAge() {
+    return await this.CvService.getCvNumberByAge(50, 18);
+  }
+
+  @Get(':id')
+  async getCvById(@Param('id', ParseIntPipe) id: number): Promise<CvEntity> {
+    return await this.CvService.getCvById(id);
   }
 }

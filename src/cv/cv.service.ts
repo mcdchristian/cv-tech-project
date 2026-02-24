@@ -69,4 +69,21 @@ export class CvService {
     const recoverCv = await this.getCvById(id);
     return await this.cvRepository.recover(recoverCv);
   }
+
+  async getCvNumberByAge(
+    maxAge?: number,
+    minAge = 0,
+  ): Promise<{ age: number; count: number }[]> {
+    // creer un query builder
+    const qb = this.cvRepository.createQueryBuilder('cv');
+    /*return await*/
+    qb.select('cv.age, count(cv.id) as nombreDeCv')
+      .where('cv.age > :minAge and cv.age < :maxAge')
+      .setParameters({ minAge, maxAge })
+      // .where(`cv.age > ${minAge} and cv.age < ${maxAge}`)
+      .groupBy('cv.age');
+    console.log(qb.getSql());
+    return await qb.getRawMany();
+    // return await qb.getMany();
+  }
 }

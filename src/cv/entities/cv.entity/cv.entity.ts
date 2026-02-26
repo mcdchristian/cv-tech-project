@@ -4,9 +4,11 @@ import {
   // CreateDateColumn,
   // DeleteDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   // UpdateDateColumn,
 } from 'typeorm';
+import { UserEntity } from '../../../user/entities/user.entity/user.entity';
 
 @Entity('cv')
 export class CvEntity extends TimestampEntities {
@@ -31,12 +33,10 @@ export class CvEntity extends TimestampEntities {
   @Column({ nullable: true })
   path?: string;
 
-  // @CreateDateColumn()
-  // createdAt?: Date;
-
-  // @UpdateDateColumn()
-  // updatedAt?: Date;
-
-  // @DeleteDateColumn()
-  // deletedAt?: Date;
+  @ManyToOne(() => UserEntity, (user) => user.cvs, {
+    cascade: ['insert', 'update'],
+    // eager: true,
+    nullable: true,
+  })
+  user?: UserEntity;
 }

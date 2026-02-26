@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CvModule } from './cv/cv.module';
+import { UserModule } from './user/user.module';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -20,6 +21,7 @@ dotenv.config();
       synchronize: true,
     }),
     CvModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

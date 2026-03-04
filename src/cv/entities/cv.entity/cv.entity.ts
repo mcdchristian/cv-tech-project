@@ -13,30 +13,30 @@ import { UserEntity } from '../../../user/entities/user.entity/user.entity';
 @Entity('cv')
 export class CvEntity extends TimestampEntities {
   @PrimaryGeneratedColumn()
-  id?: number;
+  id!: number;
 
   @Column({ name: 'name', length: 50 })
-  name?: string;
+  name!: string;
 
   @Column({ length: 50 })
-  firstname?: string;
+  firstname!: string;
 
   @Column()
-  age?: number;
+  age!: number;
 
   @Column()
-  cin?: number;
+  cin!: number;
 
   @Column()
-  job?: string;
+  job!: string;
 
   @Column({ nullable: true })
-  path?: string;
+  path!: string;
 
   @ManyToOne(() => UserEntity, (user) => user.cvs, {
     cascade: ['insert', 'update'],
     // eager: true,
     nullable: true,
   })
-  user?: UserEntity;
+  user!: UserEntity;
 }

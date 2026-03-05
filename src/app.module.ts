@@ -4,12 +4,14 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CvModule } from './cv/cv.module';
 import { UserModule } from './user/user.module';
+import { ConfigModule } from '@nestjs/config';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as 'mysql',
       host: process.env.DB_HOST,

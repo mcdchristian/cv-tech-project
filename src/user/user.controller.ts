@@ -16,7 +16,7 @@ export class UserController {
   @Post('login')
   async login(
     @Body() crendentials: LoginCredentialsDto,
-  ): Promise<Partial<UserEntity>> {
+  ) /*: Promise<Partial<UserEntity>>*/ {
     return await this.userService.login(crendentials);
   }
 }

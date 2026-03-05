@@ -9,12 +9,14 @@ import { UserEntity } from './entities/user.entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import bycrypt from 'bcrypt';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    private jwtService: JwtService,
   ) {}
   async register(userData: userRegisterDto): Promise<Partial<UserEntity>> {
     // const { username, email, password } = userData;
@@ -36,10 +38,12 @@ export class UserService {
     };
   }
 
-  async login(credentials: LoginCredentialsDto): Promise<Partial<UserEntity>> {
+  async login(
+    credentials: LoginCredentialsDto,
+  ) /*: Promise<Partial<UserEntity>>*/ {
     //on recupere le username et le password de l'utilisateur
     const { username, password } = credentials;
-    //on peut se logger soit avec le username soit avec le password
+    //on peut se logger soit avec le username soit avec l'email
     //verifier s'il un user avec ce username ou password existe
     const user = await this.userRepository
       .createQueryBuilder('user')
@@ -52,12 +56,22 @@ export class UserService {
     //si l'utilisateur existe je verifie le password est correct ou pas
     const hashedPassword = await bycrypt.hash(password, user.salt);
     if (hashedPassword === user.password) {
-      return {
+      const paylod = {
         id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
       };
+      const jwt = await this.jwtService.signAsync(paylod);
+      return {
+        access_token: jwt,
+      };
+      // return {
+      //   id: user.id,
+      //   username: user.username,
+      //   email: user.email,
+      //   role: user.role,
+      // };
     } else {
       throw new NotFoundException('invalid credentials');
     }

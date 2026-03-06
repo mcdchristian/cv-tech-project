@@ -7,26 +7,34 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CvEntity } from './entities/cv.entity/cv.entity';
 import { AddcvDto } from './dto/add-cv.dto';
 import { UpdatecvDto } from './dto/update-cv.dto';
+import { JwtAuthGuard } from '../user/guards/jwt-auth.guard';
 // import { FindOptionsWhere } from 'typeorm';
+import { Request } from 'express';
 
 @Controller('cv')
 export class CvController {
   constructor(private CvService: CvService) {}
   @Get()
+  // @UseGuards(JwtAuthGuard)
   async getAllCvs(): Promise<CvEntity[]> {
     return await this.CvService.getCvs();
   }
 
   @Post()
-  async addCv(@Body() cv: AddcvDto): Promise<CvEntity> {
+  @UseGuards(JwtAuthGuard)
+  async addCv(@Body() cv: AddcvDto, @Req() req: Request): Promise<CvEntity> {
+    console.log('user from request', req.user);
     return await this.CvService.addCv(cv);
   }
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async updateCv(
     @Body() cv: UpdatecvDto,
     @Param('id', ParseIntPipe) id: number,
@@ -68,16 +76,19 @@ export class CvController {
   // }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async softDeleteCv(@Param('id', ParseIntPipe) id: number) {
     return await this.CvService.softDeleteCv(id);
   }
 
   @Get('recover/:id')
+  @UseGuards(JwtAuthGuard)
   async restoreCv(@Param('id', ParseIntPipe) id: number) {
     return await this.CvService.restoreCv(id);
   }
   // Query builder
   @Get('stats')
+  @UseGuards(JwtAuthGuard)
   async getCvNumberByAge() {
     return await this.CvService.getCvNumberByAge(50, 18);
   }

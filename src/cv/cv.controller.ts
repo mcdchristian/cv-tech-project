@@ -17,6 +17,7 @@ import { UpdatecvDto } from './dto/update-cv.dto';
 import { JwtAuthGuard } from '../user/guards/jwt-auth.guard';
 // import { FindOptionsWhere } from 'typeorm';
 import { Request } from 'express';
+// import { UserEntity } from '../user/entities/user.entity/user.entity';
 
 @Controller('cv')
 export class CvController {
@@ -30,8 +31,9 @@ export class CvController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async addCv(@Body() cv: AddcvDto, @Req() req: Request): Promise<CvEntity> {
-    console.log('user from request', req.user);
-    return await this.CvService.addCv(cv);
+    // console.log('user from request', req.user);
+    const user = req.user;
+    return await this.CvService.addCv(cv, user);
   }
   @Patch(':id')
   @UseGuards(JwtAuthGuard)

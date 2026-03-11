@@ -4,6 +4,7 @@ import { CvEntity } from './entities/cv.entity/cv.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddcvDto } from './dto/add-cv.dto';
 import { UpdatecvDto } from './dto/update-cv.dto';
+// import { UserEntity } from '../user/entities/user.entity/user.entity';
 // import { FindOptionsWhere } from 'typeorm';
 
 @Injectable()
@@ -22,8 +23,11 @@ export class CvService {
   async getCvs(): Promise<CvEntity[]> {
     return await this.cvRepository.find();
   }
-  async addCv(cv: AddcvDto): Promise<CvEntity> {
-    return await this.cvRepository.save(cv);
+  async addCv(cv: AddcvDto, user): Promise<CvEntity> {
+    const newCv = this.cvRepository.create(cv);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    newCv.user = user;
+    return await this.cvRepository.save(newCv);
   }
   async updateCv(id: number, cv: UpdatecvDto): Promise<CvEntity> {
     const newCv = await this.cvRepository.preload({ id, ...cv });

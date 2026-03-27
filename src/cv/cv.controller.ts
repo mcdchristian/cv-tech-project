@@ -23,7 +23,7 @@ import { Request } from 'express';
 export class CvController {
   constructor(private CvService: CvService) {}
   @Get()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getAllCvs(): Promise<CvEntity[]> {
     return await this.CvService.getCvs();
   }

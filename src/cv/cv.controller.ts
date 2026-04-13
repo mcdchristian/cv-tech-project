@@ -43,6 +43,7 @@ export class CvController {
   ): Promise<CvEntity> {
     return await this.CvService.updateCv(id, cv);
   }
+  //consolge.log('update object', updateObject);
   // dans le cas d'une mise a jour partielle selon des criteres de recherche
 
   // @Patch()

@@ -11,30 +11,31 @@ import {
 export class AddcvDto {
   @IsNotEmpty()
   @IsString()
-  name?: string;
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-  firstname?: string;
+  firstname: string;
 
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   @Min(15)
   @Max(65)
-  age?: number;
+  age: number;
 
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
-  cin?: number;
+  cin: number;
 
   @IsNotEmpty()
   @IsString()
-  job?: string;
+  job: string;
 
+  // path est optionnel, mais s'il est fourni il doit être une chaîne non vide
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   path?: string;
 }
+

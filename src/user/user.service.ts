@@ -1,7 +1,7 @@
 import {
   ConflictException,
   Injectable,
-  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { userRegisterDto } from './dto/user-register.dto';
 import { Repository } from 'typeorm';
@@ -51,29 +51,21 @@ export class UserService {
         username,
       })
       .getOne();
-    //si l'utilisateur n'existe pas on retourne une exception
-    if (!user) throw new NotFoundException('invalid credentials');
-    //si l'utilisateur existe je verifie le password est correct ou pas
+    // Si l'utilisateur n'existe pas, on retourne 401 (et non 404 pour ne pas révéler d'infos)
+    if (!user) throw new UnauthorizedException('Identifiants invalides');
+    // On vérifie le mot de passe
     const hashedPassword = await bycrypt.hash(password, user.salt);
     if (hashedPassword === user.password) {
-      const paylod = {
+      const payload = {
         id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
       };
-      const jwt = await this.jwtService.signAsync(paylod);
-      return {
-        access_token: jwt,
-      };
-      // return {
-      //   id: user.id,
-      //   username: user.username,
-      //   email: user.email,
-      //   role: user.role,
-      // };
+      const jwt = await this.jwtService.signAsync(payload);
+      return { access_token: jwt };
     } else {
-      throw new NotFoundException('invalid credentials');
+      throw new UnauthorizedException('Identifiants invalides');
     }
   }
 }

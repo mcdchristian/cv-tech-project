@@ -64,15 +64,18 @@ export class CvController {
   // Restaure un CV soft-supprimé
   @Get('recover/:id')
   @UseGuards(JwtAuthGuard)
-  async restoreCv(@Param('id', ParseIntPipe) id: number) {
-    return await this.CvService.restoreCv(id);
+  async restoreCv(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: Partial<UserEntity>,
+  ) {
+    return await this.CvService.restoreCv(id, user);
   }
 
   // Statistiques : nombre de CVs par tranche d'âge
   @Get('stats')
   @UseGuards(JwtAuthGuard)
-  async getCvNumberByAge() {
-    return await this.CvService.getCvNumberByAge(50, 18);
+  async getCvNumberByAge(@User() user: Partial<UserEntity>) {
+    return await this.CvService.getCvNumberByAge(user, 50, 18);
   }
 
   // Récupère un CV par ID (ownership vérifié dans le service)

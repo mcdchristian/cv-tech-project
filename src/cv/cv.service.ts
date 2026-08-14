@@ -76,19 +76,31 @@ export class CvService {
   }
 
   // Restaure un CV soft-supprimé
-  async restoreCv(id: number) {
+  async restoreCv(id: number, user: Partial<UserEntity>) {
+    const existing = await this.cvRepository.findOne({
+      where: { id, user: { id: user.id } },
+      withDeleted: true,
+    });
+    if (!existing) {
+      throw new ForbiddenException(
+        `Le CV d'id ${id} n'existe pas ou ne vous appartient pas`,
+      );
+    }
     return await this.cvRepository.restore(id);
   }
 
   // Statistiques : nombre de CVs par tranche d'âge
   async getCvNumberByAge(
+    user: Partial<UserEntity>,
     maxAge?: number,
     minAge = 0,
   ): Promise<{ age: number; count: number }[]> {
     const qb = this.cvRepository.createQueryBuilder('cv');
     qb.select('cv.age, count(cv.id) as nombreDeCv')
+      .leftJoin('cv.user', 'user')
       .where('cv.age > :minAge and cv.age < :maxAge')
-      .setParameters({ minAge, maxAge })
+      .andWhere('user.id = :userId')
+      .setParameters({ minAge, maxAge, userId: user.id })
       .groupBy('cv.age');
     return await qb.getRawMany();
   }

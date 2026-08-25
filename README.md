@@ -170,3 +170,7 @@ Del'or Mutaliko
 Fullstack JavaScript Developer
 Specialized in Node.js, NestJS, and scalable backend systems.
 ```
+
+## CV Tech Project
+
+This project is a NestJS application providing API services.

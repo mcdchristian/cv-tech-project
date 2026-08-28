@@ -1,11 +1,19 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { userRegisterDto } from './dto/user-register.dto';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
+
+// MySQL signale une violation d'unicité par ER_DUP_ENTRY (errno 1062).
+function isDuplicateEntryError(error: unknown): boolean {
+  const driverError = (error as QueryFailedError)?.driverError as
+    | { code?: string; errno?: number }
+    | undefined;
+  return driverError?.code === 'ER_DUP_ENTRY' || driverError?.errno === 1062;
+}
 
 @Injectable()
 export class UserService {
@@ -24,8 +32,15 @@ export class UserService {
     user.password = await bcrypt.hash(user.password, user.salt);
     try {
       await this.userRepository.save(user);
-    } catch {
-      throw new ConflictException('email ou username already exist');
+    } catch (error) {
+      // Ne convertir en 409 que la violation de contrainte d'unicité. Le catch
+      // était auparavant inconditionnel : une table manquante ou une connexion
+      // perdue ressortait en « email ou username already exist », ce qui envoie
+      // le diagnostic dans la mauvaise direction.
+      if (isDuplicateEntryError(error)) {
+        throw new ConflictException('email ou username already exist');
+      }
+      throw error;
     }
     return {
       id: user.id,

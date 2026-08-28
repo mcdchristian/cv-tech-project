@@ -55,7 +55,9 @@ describe('UserService', () => {
     });
 
     it('turns a unique-constraint violation into a 409', async () => {
-      repository.save.mockRejectedValue(new Error('ER_DUP_ENTRY'));
+      const duplicate = new Error('duplicate') as Error & { driverError: unknown };
+      duplicate.driverError = { code: 'ER_DUP_ENTRY', errno: 1062 };
+      repository.save.mockRejectedValue(duplicate);
 
       await expect(
         service.register({
@@ -64,6 +66,24 @@ describe('UserService', () => {
           password: 'S3cret!pass',
         }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('lets any other database failure surface instead of masking it as a 409', async () => {
+      // Le cas réel : schéma absent. Le renvoyer en 409 « déjà existant »
+      // envoyait le diagnostic dans la mauvaise direction.
+      const missingTable = new Error("Table 'cv_tech.users' doesn't exist") as Error & {
+        driverError: unknown;
+      };
+      missingTable.driverError = { code: 'ER_NO_SUCH_TABLE', errno: 1146 };
+      repository.save.mockRejectedValue(missingTable);
+
+      await expect(
+        service.register({
+          username: 'johndoe',
+          email: 'john@example.com',
+          password: 'S3cret!pass',
+        }),
+      ).rejects.toThrow("Table 'cv_tech.users' doesn't exist");
     });
   });
 

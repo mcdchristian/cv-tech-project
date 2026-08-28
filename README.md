@@ -196,11 +196,28 @@ cp .env.example .env
 
 ### 4. Run the project
 
+Two options.
+
+**a. Everything in Docker** — nothing to install locally:
+
 ```bash
+docker compose up --build
+```
+
+MySQL is published on port **3307** on the host (3306 is usually taken by a
+locally installed MySQL); override with `DB_PUBLISHED_PORT`. The stack sets
+`DB_SYNCHRONIZE=true` so TypeORM creates the schema at boot — this project has
+no migrations yet, so never point it at a real database.
+
+**b. Local MySQL** — create the database once, then run in watch mode:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS cv_tech;"
 npm run start:dev
 ```
 
-The API then listens on http://localhost:3000/api/v1
+The API then listens on http://localhost:3000/api/v1, with Swagger UI on
+http://localhost:3000/api/v1/api-docs
 
 ### 5. Run the checks
 
@@ -208,8 +225,17 @@ The API then listens on http://localhost:3000/api/v1
 npm run lint:check && npm test && npm run build
 ```
 
-`npm run test:e2e` boots the whole `AppModule` and therefore needs a
-reachable MySQL instance.
+| Command              | Needs a database                         |
+| -------------------- | ---------------------------------------- |
+| `npm test`           | no                                       |
+| `npm run test:cov`   | no                                       |
+| `npm run lint:check` | no                                       |
+| `npm run build`      | no                                       |
+| `npm run test:e2e`   | **yes** — it boots the whole `AppModule` |
+
+Coverage sits on the rules that matter — CV ownership and the credential
+round-trip — rather than on the controllers, which only the e2e smoke test
+touches.
 
 ---
 

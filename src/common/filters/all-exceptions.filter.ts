@@ -28,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     });
 
     // Une 5xx est un bug côté serveur : on garde la stack, sinon elle est perdue.
-    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (Number(status) >= 500) {
       this.logger.error(
         `${request.method} ${request.url} -> ${status}`,
         exception instanceof Error ? exception.stack : String(exception),
@@ -41,7 +41,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * ValidationPipe, que le frontend affiche tel quel) sans jamais exposer le
    * détail interne d'une erreur non maîtrisée.
    */
-  private extractMessage(exception: unknown, status: number): string | string[] {
+  private extractMessage(exception: unknown, status: HttpStatus): string | string[] {
     if (exception instanceof HttpException) {
       const body = exception.getResponse();
       if (typeof body === 'string') return body;

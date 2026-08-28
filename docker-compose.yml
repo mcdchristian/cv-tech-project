@@ -5,8 +5,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-change-me}
       MYSQL_DATABASE: ${DB_NAME:-cv_tech}
+    # Publié sur 3307 par défaut : 3306 est presque toujours pris par un MySQL
+    # installé sur la machine, et le conflit fait échouer `docker compose up`.
+    # L'API ne passe pas par ce port, elle joint `db:3306` sur le réseau compose.
     ports:
-      - '3306:3306'
+      - '${DB_PUBLISHED_PORT:-3307}:3306'
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:

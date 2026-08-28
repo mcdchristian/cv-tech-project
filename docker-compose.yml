@@ -31,6 +31,9 @@ services:
       NODE_ENV: production
       DB_HOST: db
       DB_PORT: '3306'
+      # Ce compose sert au développement et à la démo : sans migrations, la base
+      # resterait vide. À passer à 'false' pour un déploiement réel.
+      DB_SYNCHRONIZE: 'true'
     ports:
       - '3000:3000'
     healthcheck:

@@ -55,6 +55,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    // '*' est refusé par path-to-regexp v8 (Express 5) : Nest le convertissait
+    // en '{*path}' avec un avertissement à chaque démarrage.
+    consumer.apply(LoggerMiddleware).forRoutes('{*path}');
   }
 }

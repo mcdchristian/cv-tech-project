@@ -1,13 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { userRegisterDto } from './dto/user-register.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import bycrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 
@@ -18,13 +14,14 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
     private jwtService: JwtService,
   ) {}
+
   async register(userData: userRegisterDto): Promise<Partial<UserEntity>> {
-    // const { username, email, password } = userData;
     const user = this.userRepository.create({
       ...userData,
     });
-    user.salt = await bycrypt.genSalt();
-    user.password = await bycrypt.hash(user.password, user.salt);
+    // Le sel reste stocké pour compatibilité, mais bcrypt l'embarque déjà dans le hash.
+    user.salt = await bcrypt.genSalt();
+    user.password = await bcrypt.hash(user.password, user.salt);
     try {
       await this.userRepository.save(user);
     } catch {
@@ -38,9 +35,7 @@ export class UserService {
     };
   }
 
-  async login(
-    credentials: LoginCredentialsDto,
-  ) /*: Promise<Partial<UserEntity>>*/ {
+  async login(credentials: LoginCredentialsDto): Promise<{ access_token: string }> {
     //on recupere le username et le password de l'utilisateur
     const { username, password } = credentials;
     //on peut se logger soit avec le username soit avec l'email
@@ -53,19 +48,17 @@ export class UserService {
       .getOne();
     // Si l'utilisateur n'existe pas, on retourne 401 (et non 404 pour ne pas révéler d'infos)
     if (!user) throw new UnauthorizedException('Identifiants invalides');
-    // On vérifie le mot de passe
-    const hashedPassword = await bycrypt.hash(password, user.salt);
-    if (hashedPassword === user.password) {
-      const payload = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      };
-      const jwt = await this.jwtService.signAsync(payload);
-      return { access_token: jwt };
-    } else {
+    // bcrypt.compare fait une comparaison à temps constant : pas de fuite par timing
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
       throw new UnauthorizedException('Identifiants invalides');
     }
+    const payload = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
+    return { access_token: await this.jwtService.signAsync(payload) };
   }
 }

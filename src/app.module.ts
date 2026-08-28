@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CvModule } from './cv/cv.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -28,15 +28,18 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>('DB_TYPE') as 'mysql',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT') || 3306,
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
+        type: 'mysql',
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: Number(configService.get('DB_PORT') ?? 3306),
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: ['dist/**/*.entity{.ts,.js}'],
-        synchronize: true, // Gardé à true selon le plan par défaut
+        // Les entités sont déjà déclarées par les `forFeature` de chaque module :
+        // le glob sur `dist/` ne résolvait rien sous `npm run dev` (ts-node-dev).
+        autoLoadEntities: true,
+        // `synchronize` altère le schéma au démarrage : jamais hors développement.
+        synchronize: configService.get<string>('NODE_ENV') !== 'production',
       }),
     }),
     CvModule,

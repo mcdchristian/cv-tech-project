@@ -13,13 +13,25 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Doit refléter main.ts, sinon le test valide des URLs qui n'existent pas en prod.
+    app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('/api/v1 (GET)', () => {
+    return request(app.getHttpServer()).get('/api/v1').expect(200).expect('Hello World!');
+  });
+
+  it('/api/v1/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/api/v1/health')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect((res.body as { status: string }).status).toBe('ok');
+      });
   });
 });

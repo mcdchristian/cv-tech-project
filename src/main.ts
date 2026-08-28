@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
-import morgan from 'morgan';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,10 +14,12 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL || 'http://localhost:4200',
   };
   app.enableCors(corsOptions);
-  
+
   app.use(helmet());
-  app.use(morgan('dev'));
-  
+
+  // Uniformise le corps des erreurs et journalise les 5xx avec leur stack.
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -28,7 +30,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('CV Tech API')
-    .setDescription('Documentation de l\'API CV Tech')
+    .setDescription("Documentation de l'API CV Tech")
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -37,4 +39,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();

@@ -25,6 +25,15 @@ export default tseslint.config(
     },
   },
   {
+    // Les assertions Jest passent des mocks par référence (`expect(repo.save)`),
+    // ce que `unbound-method` signale à tort sur des objets sans `this`.
+    files: ['**/*.spec.ts', '**/*.e2e-spec.ts'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',

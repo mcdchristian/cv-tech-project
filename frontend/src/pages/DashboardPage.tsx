@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCvs, type Cv } from '../api/api';
 import CvCard from '../components/CvCard';
@@ -8,19 +8,32 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchCvs = async () => {
+  // Aucun setState synchrone ici : `loading` vaut déjà true au montage, et le
+  // passer à true dans le corps d'un effet déclenche un rendu en cascade.
+  const fetchCvs = useCallback(async () => {
     try {
-      setLoading(true);
       const data = await getCvs();
       setCvs(data);
+      setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchCvs(); }, []);
+  useEffect(() => {
+    void (async () => {
+      await fetchCvs();
+    })();
+  }, [fetchCvs]);
+
+  // Rechargement après suppression : ici on est dans un gestionnaire
+  // d'événement, remettre le loader est légitime.
+  const reloadCvs = () => {
+    setLoading(true);
+    void fetchCvs();
+  };
 
   return (
     <div className="page-container animate-in">
@@ -43,7 +56,7 @@ export default function DashboardPage() {
       ) : (
         <div className="cv-grid">
           {cvs.map(cv => (
-            <CvCard key={cv.id} cv={cv} onDeleted={fetchCvs} />
+            <CvCard key={cv.id} cv={cv} onDeleted={reloadCvs} />
           ))}
         </div>
       )}

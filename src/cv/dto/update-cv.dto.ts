@@ -1,39 +1,8 @@
-import { Type } from 'class-transformer';
-import {
-  // IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { AddcvDto } from './add-cv.dto';
 
-export class UpdatecvDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  firstname?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(15)
-  @Max(65)
-  age?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  cin?: number;
-
-  @IsOptional()
-  @IsString()
-  job?: string;
-
-  @IsOptional()
-  @IsString()
-  path?: string;
-}
+/**
+ * Reprend AddcvDto en rendant chaque champ optionnel : les contraintes de
+ * validation et la documentation Swagger restent définies à un seul endroit.
+ */
+export class UpdatecvDto extends PartialType(AddcvDto) {}

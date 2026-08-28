@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login as apiLogin } from '../api/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');

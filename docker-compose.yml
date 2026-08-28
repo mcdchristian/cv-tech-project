@@ -1,8 +1,46 @@
-version: '3.8'
 services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-change-me}
+      MYSQL_DATABASE: ${DB_NAME:-cv_tech}
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-p${DB_PASSWORD:-change-me}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   api:
     build: .
-    ports:
-      - "3000:3000"
+    restart: unless-stopped
+    # L'API échoue au démarrage si MySQL n'écoute pas encore : on attend le healthcheck.
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: '3306'
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/api/v1/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:

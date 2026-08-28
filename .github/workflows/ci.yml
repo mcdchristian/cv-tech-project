@@ -26,6 +26,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Audit (bloque sur high et critical)
+        run: npm audit --audit-level=high
+
       - name: Lint
         run: npm run lint:check
 
@@ -49,6 +52,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
+        working-directory: frontend
+
+      - name: Audit (bloque sur high et critical)
+        run: npm audit --audit-level=high
         working-directory: frontend
 
       - name: Lint

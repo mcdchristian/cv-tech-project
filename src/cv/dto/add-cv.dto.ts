@@ -1,16 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class AddcvDto {
+  // maxLength alignés sur les colonnes de CvEntity (varchar 50).
   @ApiProperty({ example: 'Doe', maxLength: 50 })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(50)
   name: string;
 
   @ApiProperty({ example: 'John', maxLength: 50 })
   @IsNotEmpty()
   @IsString()
+  @MaxLength(50)
   firstname: string;
 
   @ApiProperty({ example: 30, minimum: 15, maximum: 65 })
@@ -25,6 +28,7 @@ export class AddcvDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
+  @Min(0)
   cin: number;
 
   @ApiProperty({ example: 'Software Engineer' })

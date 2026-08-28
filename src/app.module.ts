@@ -38,8 +38,15 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
         // Les entités sont déjà déclarées par les `forFeature` de chaque module :
         // le glob sur `dist/` ne résolvait rien sous `npm run dev` (ts-node-dev).
         autoLoadEntities: true,
-        // `synchronize` altère le schéma au démarrage : jamais hors développement.
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        // `synchronize` altère le schéma au démarrage. Par défaut il suit
+        // NODE_ENV, mais il reste pilotable : l'image Docker tourne en
+        // NODE_ENV=production et, faute de migrations dans ce projet, la stack
+        // compose démarrerait sur une base sans tables.
+        // Pour un vrai déploiement : laisser à false et introduire des migrations.
+        synchronize:
+          configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
+          (configService.get<string>('DB_SYNCHRONIZE') !== 'false' &&
+            configService.get<string>('NODE_ENV') !== 'production'),
       }),
     }),
     CvModule,

@@ -1,0 +1,47 @@
+version: 2
+
+updates:
+  # --- API (racine) ---
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Regroupé pour éviter une PR par paquet : les correctifs de sécurité
+    # transitifs arrivent souvent par lots de dix ou plus.
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ['*']
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+      production-minor-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+
+  # --- Frontend ---
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      security-patches:
+        applies-to: security-updates
+        patterns: ['*']
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+      production-minor-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+
+  # --- Actions GitHub utilisées par la CI ---
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']

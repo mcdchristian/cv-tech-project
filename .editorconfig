@@ -1,0 +1,22 @@
+# Aligné sur .prettierrc (tabWidth 2) et sur les conventions des deux
+# manifestes : sans ce fichier, chaque éditeur applique ses propres réglages
+# et les diffs se remplissent de reformatages involontaires.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+# Deux espaces en fin de ligne sont un retour à la ligne en Markdown.
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab

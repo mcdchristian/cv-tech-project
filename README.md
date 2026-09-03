@@ -122,7 +122,7 @@ the CVs of the authenticated user.
 | POST   | /api/v1/cv             | Create a CV                           |
 | PATCH  | /api/v1/cv/:id         | Update a CV                           |
 | DELETE | /api/v1/cv/:id         | Soft delete a CV                      |
-| GET    | /api/v1/cv/recover/:id | Restore a CV                          |
+| PATCH  | /api/v1/cv/:id/restore | Restore a soft-deleted CV             |
 | GET    | /api/v1/cv/stats       | CV count per age (`?minAge=&maxAge=`) |
 
 ---

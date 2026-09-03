@@ -69,8 +69,10 @@ export class CvController {
     return await this.CvService.softDeleteCv(id, user);
   }
 
-  // Restaure un CV soft-supprimé
-  @Get('recover/:id')
+  // Restaure un CV soft-supprimé. PATCH et non GET : la restauration modifie
+  // l'état, or un GET doit rester sûr — un préchargement de navigateur ou un
+  // crawler suivant le lien ressusciterait des CVs supprimés.
+  @Patch(':id/restore')
   @ApiOperation({ summary: 'Restaurer un CV supprimé' })
   @ApiForbiddenResponse({ description: "Le CV n'existe pas ou ne vous appartient pas" })
   async restoreCv(@Param('id', ParseIntPipe) id: number, @User() user: Partial<UserEntity>) {

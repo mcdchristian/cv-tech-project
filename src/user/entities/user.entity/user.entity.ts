@@ -23,9 +23,12 @@ export class UserEntity extends TimestampEntities {
   @Column({ enum: UserRoleEnum, type: 'enum', default: UserRoleEnum.USER })
   role!: string;
 
+  // Pas de `eager` : la stratégie JWT charge l'utilisateur à chaque requête
+  // authentifiée et jette la relation. La charger coûtait deux requêtes SQL
+  // supplémentaires par appel, dont une qui grandit avec le nombre de CVs.
+  // Les consommateurs qui en ont besoin la demandent via `relations`.
   @OneToMany(() => CvEntity, (cv) => cv.user, {
     cascade: true,
-    eager: true,
     nullable: true,
   })
   cvs!: CvEntity[];

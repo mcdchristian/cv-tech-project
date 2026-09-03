@@ -5,6 +5,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { CvModule } from './cv/cv.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import appConfig from './config/app.config';
+import { validateEnv } from './config/env.validation';
 import { APP_GUARD } from '@nestjs/core';
 import { HealthModule } from './health/health.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -12,7 +14,13 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig],
+      // Échoue au démarrage sur une variable manquante ou mal formée, plutôt
+      // qu'au premier appel qui en a besoin.
+      validate: validateEnv,
+    }),
     // 10 req/min en global rendait le dashboard inutilisable (il enchaîne
     // plusieurs appels par écran) : la limite stricte est posée sur /user/login.
     ThrottlerModule.forRootAsync({

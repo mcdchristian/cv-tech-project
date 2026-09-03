@@ -23,10 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: PayloadInterface) {
-    // return { userId: payload.sub, username: payload.username };
-    //on recupere le username de l'utilisateur a partir du payload
+    // Recherche par clé primaire : `username` est indexé mais modifiable, et le
+    // token porte déjà l'id. Un renommage invaliderait sinon les tokens en cours.
     const user = await this.userRepository.findOne({
-      where: { username: payload.username },
+      where: { id: payload.id },
     });
     //si l'utilisateur existe je le retourne et et ce que je retourne ici sera dispo dans le request (controller)
     if (user) {

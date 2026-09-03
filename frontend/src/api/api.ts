@@ -45,5 +45,5 @@ export const getCvById = (id: number) => request<Cv>(`/cv/${id}`);
 export const createCv = (data: CvCreateData) => request<Cv>('/cv', { method: 'POST', body: JSON.stringify(data) });
 export const updateCv = (id: number, data: CvUpdateData) => request<Cv>(`/cv/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 export const deleteCv = (id: number) => request<void>(`/cv/${id}`, { method: 'DELETE' });
-export const restoreCv = (id: number) => request<void>(`/cv/recover/${id}`);
+export const restoreCv = (id: number) => request<void>(`/cv/${id}/restore`, { method: 'PATCH' });
 export const getCvStats = () => request<CvStat[]>('/cv/stats');

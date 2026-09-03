@@ -1,16 +1,12 @@
 import { TimestampEntities } from '../../../generics/timestamp.entities';
-import {
-  Column,
-  // CreateDateColumn,
-  // DeleteDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  // UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../../../user/entities/user.entity/user.entity';
 
 @Entity('cv')
+// Toutes les lectures filtrent sur le propriétaire ; /cv/stats y ajoute une
+// tranche d'âge et groupe dessus. L'index FK seul laissait MySQL parcourir
+// chaque ligne du propriétaire pour appliquer le filtre d'âge et trier.
+@Index(['user', 'age'])
 export class CvEntity extends TimestampEntities {
   @PrimaryGeneratedColumn()
   id!: number;

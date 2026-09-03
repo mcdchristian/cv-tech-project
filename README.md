@@ -129,10 +129,10 @@ the CVs of the authenticated user.
 
 ### 🩺 Operations
 
-| Method | Endpoint         | Description                      |
-| ------ | ---------------- | -------------------------------- |
-| GET    | /api/v1/health   | Liveness probe (status + uptime) |
-| GET    | /api/v1/api-docs | Swagger UI                       |
+| Method | Endpoint         | Description                       |
+| ------ | ---------------- | --------------------------------- |
+| GET    | /api/v1/health   | Liveness probe (status + uptime)  |
+| GET    | /api/v1/api-docs | Swagger UI (hors production only) |
 
 ---
 

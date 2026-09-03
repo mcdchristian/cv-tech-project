@@ -10,8 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 // MySQL signale une violation d'unicité par ER_DUP_ENTRY (errno 1062).
 function isDuplicateEntryError(error: unknown): boolean {
   const driverError = (error as QueryFailedError)?.driverError as
-    | { code?: string; errno?: number }
-    | undefined;
+    { code?: string; errno?: number } | undefined;
   return driverError?.code === 'ER_DUP_ENTRY' || driverError?.errno === 1062;
 }
 

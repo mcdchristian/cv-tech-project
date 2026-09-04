@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
+import type { PayloadInterface } from './interfaces/payload.interface';
 
 // Coût bcrypt. 10 est le défaut de la bibliothèque ; l'augmenter ralentit
 // volontairement la vérification, donc aussi une attaque par force brute.
@@ -71,7 +72,9 @@ export class UserService {
     if (!passwordMatches) {
       throw new UnauthorizedException('Identifiants invalides');
     }
-    const payload = {
+    // Typé : ajouter un champ au JWT sans l'ajouter au type ne compile plus,
+    // et inversement la stratégie ne peut pas lire un champ jamais signé.
+    const payload: PayloadInterface = {
       id: user.id,
       username: user.username,
       email: user.email,

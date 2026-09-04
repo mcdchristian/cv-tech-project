@@ -37,6 +37,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint plafonne à `typescript <6.1.0` : le bump automatique
+      # vers TypeScript 7 a cassé `npm ci` sur le job Frontend. À rouvrir quand
+      # le linter suivra.
+      - dependency-name: 'typescript'
+        update-types: [version-update:semver-major]
     groups:
       security-patches:
         applies-to: security-updates

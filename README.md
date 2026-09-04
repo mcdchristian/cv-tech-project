@@ -246,6 +246,7 @@ A React + Vite client lives in `frontend/`:
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```

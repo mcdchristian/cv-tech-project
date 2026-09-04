@@ -4,6 +4,16 @@ function getToken(): string | null {
   return localStorage.getItem('cv_tech_token');
 }
 
+/**
+ * Permet à AuthProvider de réagir à un 401 sans que ce module importe React.
+ * Sans ce rappel, un token refusé laissait l'interface en session ouverte et
+ * chaque action se soldait par « Unauthorized » jusqu'à déconnexion manuelle.
+ */
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -15,6 +25,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
   const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
   if (!response.ok) {
+    // 401 sur une route authentifiée = token expiré ou révoqué. La connexion
+    // elle-même renvoie aussi 401 sur mauvais identifiants : ne pas la traiter
+    // comme une expiration, sinon on efface un token qui n'existe pas encore.
+    if (response.status === 401 && !endpoint.startsWith('/user/login')) {
+      onUnauthorized?.();
+    }
     const err = await response.json().catch(() => ({}));
     const msg = Array.isArray(err.message) ? err.message.join(', ') : err.message || `Erreur ${response.status}`;
     throw new Error(msg);

@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     //si l'utilisateur existe je le retourne et et ce que je retourne ici sera dispo dans le request (controller)
     if (user) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password: _password, salt: _salt, ...result } = user;
+      const { password: _password, ...result } = user;
       return result;
     } else {
       throw new UnauthorizedException();

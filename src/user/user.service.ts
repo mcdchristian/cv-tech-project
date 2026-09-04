@@ -7,6 +7,10 @@ import * as bcrypt from 'bcrypt';
 import { LoginCredentialsDto } from './dto/login-credentials.dto';
 import { JwtService } from '@nestjs/jwt';
 
+// Coût bcrypt. 10 est le défaut de la bibliothèque ; l'augmenter ralentit
+// volontairement la vérification, donc aussi une attaque par force brute.
+const SALT_ROUNDS = 12;
+
 // MySQL signale une violation d'unicité par ER_DUP_ENTRY (errno 1062).
 function isDuplicateEntryError(error: unknown): boolean {
   const driverError = (error as QueryFailedError)?.driverError as
@@ -26,9 +30,9 @@ export class UserService {
     const user = this.userRepository.create({
       ...userData,
     });
-    // Le sel reste stocké pour compatibilité, mais bcrypt l'embarque déjà dans le hash.
-    user.salt = await bcrypt.genSalt();
-    user.password = await bcrypt.hash(user.password, user.salt);
+    // bcrypt.hash génère son propre sel et l'embarque dans le hash renvoyé :
+    // c'est ce hash que bcrypt.compare relit à la connexion.
+    user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
     try {
       await this.userRepository.save(user);
     } catch (error) {

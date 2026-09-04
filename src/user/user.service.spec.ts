@@ -51,7 +51,6 @@ describe('UserService', () => {
       expect(saved.password).not.toBe('S3cret!pass');
       await expect(bcrypt.compare('S3cret!pass', saved.password)).resolves.toBe(true);
       expect(created).not.toHaveProperty('password');
-      expect(created).not.toHaveProperty('salt');
     });
 
     it('turns a unique-constraint violation into a 409', async () => {
@@ -89,14 +88,13 @@ describe('UserService', () => {
 
   describe('login', () => {
     const buildUser = async (password: string): Promise<UserEntity> => {
-      const salt = await bcrypt.genSalt();
       return {
         id: 1,
         username: 'johndoe',
         email: 'john@example.com',
         role: 'user',
-        salt,
-        password: await bcrypt.hash(password, salt),
+        // Le hash porte son propre sel : aucune colonne séparée n'est nécessaire.
+        password: await bcrypt.hash(password, 12),
       } as UserEntity;
     };
 

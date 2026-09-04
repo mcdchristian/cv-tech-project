@@ -22,8 +22,13 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/api/v1 (GET)', () => {
-    return request(app.getHttpServer()).get('/api/v1').expect(200).expect('Hello World!');
+  it('/api/v1 (GET) identifies the API', () => {
+    return request(app.getHttpServer())
+      .get('/api/v1')
+      .expect(200)
+      .expect((res) => {
+        expect((res.body as { name: string }).name).toBe('CV Tech API');
+      });
   });
 
   it('/api/v1/health (GET)', () => {

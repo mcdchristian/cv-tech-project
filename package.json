@@ -85,6 +85,10 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "//": "@nestjs/config@12 est ESM pur : sans cette exception, tout test important un module qui en d\u00e9pend \u00e9choue au chargement. Doit rester align\u00e9 avec test/jest-e2e.json.",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@nestjs/config)/)"
+    ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

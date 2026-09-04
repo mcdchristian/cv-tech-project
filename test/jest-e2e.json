@@ -5,5 +5,7 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "//": "@nestjs/config@12 est publié en ESM pur. Jest exécute ces suites en CommonJS, donc il faut l'inclure dans la transformation : par défaut node_modules en est exclu, et le require() échoue sur la syntaxe import/export.",
+  "transformIgnorePatterns": ["node_modules/(?!(@nestjs/config)/)"]
 }

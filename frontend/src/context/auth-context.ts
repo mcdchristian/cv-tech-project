@@ -5,6 +5,8 @@ export interface AuthUser {
   username: string;
   email: string;
   role: string;
+  /** Expiration UNIX (secondes) posée par le backend dans le JWT. */
+  exp?: number;
 }
 
 export interface AuthContextType {
@@ -21,4 +23,26 @@ export const AuthContext = createContext<AuthContextType>(null!);
 
 export function useAuth() {
   return useContext(AuthContext);
+}
+
+export const TOKEN_KEY = 'cv_tech_token';
+
+/**
+ * Décode le payload d'un JWT et rejette un token expiré.
+ *
+ * Le `exp` n'est pas une garantie de sécurité — c'est le backend qui refuse
+ * un token périmé. Il sert ici à ne pas afficher une session ouverte alors
+ * que chaque appel va échouer en 401.
+ */
+export function decodeToken(token: string): AuthUser | null {
+  try {
+    const [, payload] = token.split('.');
+    const decoded = JSON.parse(atob(payload)) as AuthUser;
+    if (typeof decoded.exp === 'number' && decoded.exp * 1000 <= Date.now()) {
+      return null;
+    }
+    return decoded;
+  } catch {
+    return null;
+  }
 }

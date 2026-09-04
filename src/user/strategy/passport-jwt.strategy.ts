@@ -3,7 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 // import { jwtConstants } from './constants';
 import { ConfigService } from '@nestjs/config';
-import { PayloadInterface } from '../interfaces/payload.interface';
+import type { PayloadInterface } from '../interfaces/payload.interface';
+import type { AuthenticatedUser } from '../../decorators/user.decorator';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,19 +23,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: PayloadInterface) {
+  async validate(payload: PayloadInterface): Promise<AuthenticatedUser> {
     // Recherche par clé primaire : `username` est indexé mais modifiable, et le
     // token porte déjà l'id. Un renommage invaliderait sinon les tokens en cours.
     const user = await this.userRepository.findOne({
       where: { id: payload.id },
     });
-    //si l'utilisateur existe je le retourne et et ce que je retourne ici sera dispo dans le request (controller)
-    if (user) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password: _password, salt: _salt, ...result } = user;
-      return result;
-    } else {
+    if (!user) {
       throw new UnauthorizedException();
     }
+    // Projection explicite plutôt qu'un rest-spread : celui-ci laissait passer
+    // createdAt, updatedAt, deletedAt et la relation cvs, alors que le type vu
+    // par les contrôleurs n'annonce que ces quatre champs. Ce qui est retourné
+    // ici devient `request.user`, donc la valeur de `@User()`.
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
   }
 }

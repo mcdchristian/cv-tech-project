@@ -17,9 +17,6 @@ export class UserEntity extends TimestampEntities {
   @Column()
   password!: string;
 
-  @Column()
-  salt!: string;
-
   @Column({ enum: UserRoleEnum, type: 'enum', default: UserRoleEnum.USER })
   role!: string;
 

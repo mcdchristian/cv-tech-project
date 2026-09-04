@@ -38,6 +38,52 @@ jobs:
       - name: Build
         run: npm run build
 
+  e2e:
+    name: API (e2e against MySQL)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: e2e
+          MYSQL_DATABASE: cv_tech
+        ports:
+          - 3306:3306
+        # Sans ce healthcheck le job démarre avant que MySQL n'accepte les
+        # connexions, et la suite échoue sur ECONNREFUSED plutôt que sur un test.
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pe2e"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      NODE_ENV: test
+      PORT: '3000'
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_USERNAME: root
+      DB_PASSWORD: e2e
+      DB_NAME: cv_tech
+      # Pas de migrations dans le projet : le schéma est créé au démarrage.
+      DB_SYNCHRONIZE: 'true'
+      SECRET: ci-only-secret-not-used-anywhere-else
+      FRONTEND_URL: http://localhost:4200
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
   frontend:
     name: Frontend (build)
     runs-on: ubuntu-latest

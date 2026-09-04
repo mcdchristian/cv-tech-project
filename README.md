@@ -129,10 +129,11 @@ the CVs of the authenticated user.
 
 ### 🩺 Operations
 
-| Method | Endpoint         | Description                       |
-| ------ | ---------------- | --------------------------------- |
-| GET    | /api/v1/health   | Liveness probe (status + uptime)  |
-| GET    | /api/v1/api-docs | Swagger UI (hors production only) |
+| Method | Endpoint             | Description                       |
+| ------ | -------------------- | --------------------------------- |
+| GET    | /api/v1/health       | Liveness — process is up (no DB)  |
+| GET    | /api/v1/health/ready | Readiness — 503 if MySQL is down  |
+| GET    | /api/v1/api-docs     | Swagger UI (hors production only) |
 
 ---
 
@@ -245,6 +246,7 @@ A React + Vite client lives in `frontend/`:
 
 ```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```

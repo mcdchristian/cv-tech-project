@@ -4,9 +4,14 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CvService } from './cv.service';
 import { CvEntity } from './entities/cv.entity/cv.entity';
-import { UserEntity } from '../user/entities/user.entity/user.entity';
+import type { AuthenticatedUser } from '../decorators/user.decorator';
 
-const owner: Partial<UserEntity> = { id: 1, username: 'owner' };
+const owner: AuthenticatedUser = {
+  id: 1,
+  username: 'owner',
+  email: 'owner@example.com',
+  role: 'user',
+};
 
 describe('CvService', () => {
   let service: CvService;

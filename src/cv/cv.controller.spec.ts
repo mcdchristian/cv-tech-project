@@ -2,10 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CvController } from './cv.controller';
 import { CvService } from './cv.service';
 import { JwtAuthGuard } from '../user/guards/jwt-auth.guard';
-import { UserEntity } from '../user/entities/user.entity/user.entity';
+import type { AuthenticatedUser } from '../decorators/user.decorator';
 import { CvEntity } from './entities/cv.entity/cv.entity';
 
-const owner: Partial<UserEntity> = { id: 1, username: 'owner' };
+const owner: AuthenticatedUser = {
+  id: 1,
+  username: 'owner',
+  email: 'owner@example.com',
+  role: 'user',
+};
 
 describe('CvController', () => {
   let controller: CvController;

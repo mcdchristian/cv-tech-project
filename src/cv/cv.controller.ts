@@ -24,8 +24,7 @@ import { AddcvDto } from './dto/add-cv.dto';
 import { UpdatecvDto } from './dto/update-cv.dto';
 import { CvStatsQueryDto } from './dto/cv-stats-query.dto';
 import { JwtAuthGuard } from '../user/guards/jwt-auth.guard';
-import { User } from '../decorators/user.decorator';
-import { UserEntity } from '../user/entities/user.entity/user.entity';
+import { User, type AuthenticatedUser } from '../decorators/user.decorator';
 
 @ApiTags('cv')
 @ApiBearerAuth()
@@ -38,14 +37,14 @@ export class CvController {
   // Retourne uniquement les CVs de l'utilisateur connecté
   @Get()
   @ApiOperation({ summary: "Lister les CVs de l'utilisateur connecté" })
-  async getAllCvs(@User() user: Partial<UserEntity>): Promise<CvEntity[]> {
+  async getAllCvs(@User() user: AuthenticatedUser): Promise<CvEntity[]> {
     return await this.CvService.getCvs(user);
   }
 
   // Crée un CV et l'associe à l'utilisateur connecté
   @Post()
   @ApiOperation({ summary: 'Créer un CV' })
-  async addCv(@Body() cv: AddcvDto, @User() user: Partial<UserEntity>): Promise<CvEntity> {
+  async addCv(@Body() cv: AddcvDto, @User() user: AuthenticatedUser): Promise<CvEntity> {
     return await this.CvService.addCv(cv, user);
   }
 
@@ -56,7 +55,7 @@ export class CvController {
   async updateCv(
     @Body() cv: UpdatecvDto,
     @Param('id', ParseIntPipe) id: number,
-    @User() user: Partial<UserEntity>,
+    @User() user: AuthenticatedUser,
   ): Promise<CvEntity> {
     return await this.CvService.updateCv(id, cv, user);
   }
@@ -65,7 +64,7 @@ export class CvController {
   @Delete(':id')
   @ApiOperation({ summary: 'Supprimer un CV (soft delete)' })
   @ApiForbiddenResponse({ description: "Le CV n'existe pas ou ne vous appartient pas" })
-  async softDeleteCv(@Param('id', ParseIntPipe) id: number, @User() user: Partial<UserEntity>) {
+  async softDeleteCv(@Param('id', ParseIntPipe) id: number, @User() user: AuthenticatedUser) {
     return await this.CvService.softDeleteCv(id, user);
   }
 
@@ -75,14 +74,14 @@ export class CvController {
   @Patch(':id/restore')
   @ApiOperation({ summary: 'Restaurer un CV supprimé' })
   @ApiForbiddenResponse({ description: "Le CV n'existe pas ou ne vous appartient pas" })
-  async restoreCv(@Param('id', ParseIntPipe) id: number, @User() user: Partial<UserEntity>) {
+  async restoreCv(@Param('id', ParseIntPipe) id: number, @User() user: AuthenticatedUser) {
     return await this.CvService.restoreCv(id, user);
   }
 
   // Statistiques : nombre de CVs par tranche d'âge (bornes optionnelles)
   @Get('stats')
   @ApiOperation({ summary: 'Nombre de CVs par âge, sur une tranche optionnelle' })
-  async getCvNumberByAge(@User() user: Partial<UserEntity>, @Query() query: CvStatsQueryDto) {
+  async getCvNumberByAge(@User() user: AuthenticatedUser, @Query() query: CvStatsQueryDto) {
     return await this.CvService.getCvNumberByAge(user, query);
   }
 
@@ -92,7 +91,7 @@ export class CvController {
   @ApiNotFoundResponse({ description: "Le CV n'existe pas ou ne vous appartient pas" })
   async getCvById(
     @Param('id', ParseIntPipe) id: number,
-    @User() user: Partial<UserEntity>,
+    @User() user: AuthenticatedUser,
   ): Promise<CvEntity> {
     return await this.CvService.getCvById(id, user);
   }

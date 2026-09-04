@@ -7,6 +7,17 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # Nest 12 est bloqué par @nestjs/throttler, dont aucune version publiée
+      # n'accepte @nestjs/common@^12. Un bump majeur d'un seul de ces paquets
+      # casse la résolution npm : c'est exactement ce qui a mis `npm ci` par
+      # terre. À rouvrir quand le throttler suivra.
+      - dependency-name: '@nestjs/*'
+        update-types: [version-update:semver-major]
+      # typeorm 0.3 -> 1.x change le contrat public : à migrer délibérément,
+      # pas au fil d'une PR automatique.
+      - dependency-name: 'typeorm'
+        update-types: [version-update:semver-major]
     # Regroupé pour éviter une PR par paquet : les correctifs de sécurité
     # transitifs arrivent souvent par lots de dix ou plus.
     groups:

@@ -17,13 +17,43 @@ export interface CvAgeStat {
 export class CvService {
   constructor(@InjectRepository(CvEntity) private cvRepository: Repository<CvEntity>) {}
 
+  /**
+   * Le même message pour « n'existe pas » et « ne vous appartient pas » est
+   * délibéré : les distinguer ferait de l'endpoint un oracle permettant
+   * d'énumérer les identifiants réellement utilisés.
+   */
+  private ownershipMessage(id: number): string {
+    return `Le CV d'id ${id} n'existe pas ou ne vous appartient pas`;
+  }
+
+  /** Charge un CV en exigeant qu'il appartienne à l'appelant. */
+  private async findOwned(
+    id: number,
+    user: Partial<UserEntity>,
+    options: { withDeleted?: boolean } = {},
+  ): Promise<CvEntity | null> {
+    return await this.cvRepository.findOne({
+      where: { id, user: { id: user.id } },
+      ...options,
+    });
+  }
+
+  /** Variante pour les mutations, qui répondent 403 là où la lecture répond 404. */
+  private async assertOwned(
+    id: number,
+    user: Partial<UserEntity>,
+    options: { withDeleted?: boolean } = {},
+  ): Promise<void> {
+    if (!(await this.findOwned(id, user, options))) {
+      throw new ForbiddenException(this.ownershipMessage(id));
+    }
+  }
+
   // Récupère un CV par ID en vérifiant qu'il appartient à l'utilisateur
   async getCvById(id: number, user: Partial<UserEntity>): Promise<CvEntity> {
-    const cv = await this.cvRepository.findOne({
-      where: { id, user: { id: user.id } },
-    });
+    const cv = await this.findOwned(id, user);
     if (!cv) {
-      throw new NotFoundException(`Le CV d'id ${id} n'existe pas ou ne vous appartient pas`);
+      throw new NotFoundException(this.ownershipMessage(id));
     }
     return cv;
   }
@@ -44,37 +74,21 @@ export class CvService {
 
   // Met à jour un CV en vérifiant l'ownership
   async updateCv(id: number, cv: UpdatecvDto, user: Partial<UserEntity>): Promise<CvEntity> {
-    // Vérifie que le CV existe et appartient à l'utilisateur
-    const existing = await this.cvRepository.findOne({
-      where: { id, user: { id: user.id } },
-    });
-    if (!existing) {
-      throw new ForbiddenException(`Le CV d'id ${id} n'existe pas ou ne vous appartient pas`);
-    }
+    await this.assertOwned(id, user);
     const updatedCv = await this.cvRepository.preload({ id, ...cv });
     return await this.cvRepository.save(updatedCv!);
   }
 
   // Soft-delete en vérifiant l'ownership
   async softDeleteCv(id: number, user: Partial<UserEntity>) {
-    const existing = await this.cvRepository.findOne({
-      where: { id, user: { id: user.id } },
-    });
-    if (!existing) {
-      throw new ForbiddenException(`Le CV d'id ${id} n'existe pas ou ne vous appartient pas`);
-    }
+    await this.assertOwned(id, user);
     return await this.cvRepository.softDelete(id);
   }
 
-  // Restaure un CV soft-supprimé
+  // Restaure un CV soft-supprimé. `withDeleted` est indispensable : sans lui le
+  // CV supprimé est introuvable, donc impossible à restaurer.
   async restoreCv(id: number, user: Partial<UserEntity>) {
-    const existing = await this.cvRepository.findOne({
-      where: { id, user: { id: user.id } },
-      withDeleted: true,
-    });
-    if (!existing) {
-      throw new ForbiddenException(`Le CV d'id ${id} n'existe pas ou ne vous appartient pas`);
-    }
+    await this.assertOwned(id, user, { withDeleted: true });
     return await this.cvRepository.restore(id);
   }
 
